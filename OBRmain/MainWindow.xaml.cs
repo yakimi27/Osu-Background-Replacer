@@ -66,6 +66,14 @@ public partial class MainWindow
 
     private async void StartReplacement_Click(object sender, RoutedEventArgs e)
     {
+        if (!FolderOperations.SelectedFolderPath.Contains("osu!\\Songs", StringComparison.OrdinalIgnoreCase))
+        {
+            var wrongPathResult = MessageBox.Show(
+                "The selected path doesn't contain the \"osu!\\Songs\" folder. This might mean you selected the wrong directory. Are you sure you want to continue with the replacement?",
+                "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (wrongPathResult != MessageBoxResult.Yes) return;
+        }
+
         var progress = new Progress<int>(p => ReplacingProgressBar.Value = p);
 
         ReplacingProgressBar.Visibility = Visibility.Visible;
