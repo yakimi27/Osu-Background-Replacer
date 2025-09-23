@@ -58,9 +58,14 @@ public partial class MainWindow
     }
 
 
-    private void StartReplacement_Click(object sender, RoutedEventArgs e)
+    private async void StartReplacement_Click(object sender, RoutedEventArgs e)
     {
-        List<string> replacedFiles = Operations.Replacement();
+        var progress = new Progress<int>(p => ReplacingProgressBar.Value = p);
+
+        ReplacingProgressBar.Visibility = Visibility.Visible;
+        List<string> replacedFiles = await Operations.Replacement(progress);
+        ReplacingProgressBar.Visibility = Visibility.Collapsed;
+
         ChangedFilesListBox.ItemsSource = replacedFiles;
     }
 

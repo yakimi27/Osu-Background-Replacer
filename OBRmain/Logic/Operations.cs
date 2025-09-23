@@ -1,11 +1,13 @@
 ﻿using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Threading.Tasks;
 
 namespace OBRmain.Logic;
 
 public class Operations
 {
-    public static List<string> Replacement()
+    public static async Task<List<string>> Replacement(IProgress<int>? progress = null)
     {
         try
         {
@@ -18,22 +20,32 @@ public class Operations
 
             List<string> replacedFiles = new List<string>();
 
+            var allImageFiles = await Task.Run(() => Directory.GetDirectories(FolderOperations.SelectedFolderPath)
+                .SelectMany(folder => Directory.GetFiles(folder, "*.*")
+                    .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)))
+                .ToList());
+
+            int total = allImageFiles.Count;
+            int current = 0;
+
             foreach (var folder in Directory.GetDirectories(FolderOperations.SelectedFolderPath))
             {
-                var imageFiles = Directory.GetFiles(folder, "*.*")
+                var imageFiles = await Task.Run(() => Directory.GetFiles(folder, "*.*")
                     .Where(f => f.EndsWith(".jpg") || f.EndsWith(".png") || f.EndsWith(".jpeg"))
-                    .ToList();
+                    .ToList());
 
                 if (imageFiles.Count > 0)
                 {
                     foreach (var imageFile in imageFiles)
                     {
-                        string newFileName = System.IO.Path.GetFileName(imageFile);
-                        string newFilePath = System.IO.Path.Combine(folder, newFileName);
+                        string newFileName = Path.GetFileName(imageFile);
+                        string newFilePath = Path.Combine(folder, newFileName);
 
                         try
                         {
-                            File.Copy(ImageOperations.SelectedImagePath, newFilePath, true);
+                            await Task.Run(() => File.Copy(ImageOperations.SelectedImagePath, newFilePath, true));
                             replacedFiles.Add(newFilePath);
                         }
                         catch (Exception exception)
@@ -41,12 +53,17 @@ public class Operations
                             MainWindow.ShowException($"Issue:  ", exception.Message);
                             return new List<string>();
                         }
+
+                        current++;
+                        int percent = (int)((double)current / total * 100);
+                        progress?.Report(percent);
                     }
                 }
             }
 
-            MainWindow.ShowMessageBox($"Successfully changed {replacedFiles.Count} files.", "Done",
-                MessageBoxImage.Information);
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+                MainWindow.ShowMessageBox($"Successfully changed {replacedFiles.Count} files.", "Done",
+                    MessageBoxImage.Information));
             return replacedFiles;
         }
         catch (Exception exception)

@@ -11,6 +11,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -46,12 +47,15 @@
                     Margin="0 5 0 0" Height="30" />
         </StackPanel>
 
+        <ProgressBar x:Name="ReplacingProgressBar" Grid.Row="1" Grid.ColumnSpan="3" Grid.Column="0" Height="10"
+                     Margin="0 10 0 0" Visibility="Collapsed"/>
+
         <Button Style="{StaticResource Button}" Content="Replace" Click="StartReplacement_Click" Margin="0 10 0 0"
-                Height="35" Grid.Row="1"
+                Height="35" Grid.Row="2"
                 Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch"
                 VerticalAlignment="Top" />
 
-        <ScrollViewer Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10,0,0">
+        <ScrollViewer Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,10,0,0">
             <ListBox Name="ChangedFilesListBox" />
         </ScrollViewer>
     </Grid>
