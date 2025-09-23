@@ -19,6 +19,7 @@ public partial class MainWindow
     public MainWindow()
     {
         InitializeComponent();
+        ChangedFilesListBox.PreviewMouseWheel += ListBox_PreviewMouseWheel;
     }
 
     private void SelectFolder_Click(object sender, RoutedEventArgs e)
@@ -28,6 +29,7 @@ public partial class MainWindow
         ChosenFolderPathLabel.Content = FolderOperations.SelectedFolderPath;
         ChosenFolderPathLabel.ToolTip = FolderOperations.SelectedFolderPath;
         ToolTipService.SetIsEnabled(ChosenFolderPathLabel, true);
+        ChosenFolderPathLabel.Visibility = Visibility.Visible;
     }
 
     private void SelectImage_Click(object sender, RoutedEventArgs e)
@@ -37,15 +39,18 @@ public partial class MainWindow
         ChosenImagePathLabel.Content = ImageOperations.SelectedImagePath;
         ChosenImagePathLabel.ToolTip = ImageOperations.SelectedImagePath;
         ToolTipService.SetIsEnabled(ChosenImagePathLabel, true);
+        ChosenImagePathLabel.Visibility = Visibility.Visible;
     }
 
     private void FolderDrop(object sender, DragEventArgs e)
     {
         FolderOperations.DragAndDropFolder(e);
 
+
         ChosenFolderPathLabel.Content = FolderOperations.SelectedFolderPath;
         ChosenFolderPathLabel.ToolTip = FolderOperations.SelectedFolderPath;
         ToolTipService.SetIsEnabled(ChosenFolderPathLabel, true);
+        ChosenFolderPathLabel.Visibility = Visibility.Visible;
     }
 
     private void FileDrop(object sender, DragEventArgs e)
@@ -55,6 +60,7 @@ public partial class MainWindow
         ChosenImagePathLabel.Content = ImageOperations.SelectedImagePath;
         ChosenImagePathLabel.ToolTip = ImageOperations.SelectedImagePath;
         ToolTipService.SetIsEnabled(ChosenImagePathLabel, true);
+        ChosenImagePathLabel.Visibility = Visibility.Visible;
     }
 
 
@@ -84,5 +90,38 @@ public partial class MainWindow
         MessageBox.Show(Application.Current.MainWindow, $"{text}",
             $"{caption}", button,
             icon);
+    }
+
+    private void ListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        var listBox = sender as ListBox;
+        var scrollViewer = GetScrollViewer(listBox);
+
+        if (scrollViewer == null) return;
+
+        if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+        {
+            scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - e.Delta / 60);
+            e.Handled = true;
+        }
+        else
+        {
+            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta / 60);
+            e.Handled = true;
+        }
+    }
+
+    private ScrollViewer? GetScrollViewer(DependencyObject dep)
+    {
+        if (dep is ScrollViewer) return dep as ScrollViewer;
+
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(dep); i++)
+        {
+            var child = VisualTreeHelper.GetChild(dep, i);
+            var result = GetScrollViewer(child);
+            if (result != null) return result;
+        }
+
+        return null;
     }
 }
