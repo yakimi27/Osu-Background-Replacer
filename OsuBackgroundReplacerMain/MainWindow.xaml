@@ -58,25 +58,43 @@
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Select Files" HorizontalAlignment="Left" FontSize="20"/>
 
-                    <Border Grid.Row="1" Grid.Column="0" BorderThickness="1" CornerRadius="14" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                    <Border Grid.Row="1" Grid.Column="0" BorderThickness="1" CornerRadius="14" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
                             AllowDrop="True" Drop="DropFolder" DragOver="OnDragOver">
-                        <TextBlock Text="Drag &amp; drop Songs folder here" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Grid.Row="0" Text=""/>
+                            <TextBlock Text="Drag &amp; drop Songs folder here" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Grid>
                     </Border>
 
                     <Button Grid.Row="2" Grid.Column="0" Content="Browse folder..." Click="BrowseFolder_Click"/>
 
-                    <Border Grid.Row="3" Grid.Column="0" BorderThickness="1" Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" CornerRadius="10" Padding="12 0"  >
+                    <Border Grid.Row="3" Grid.Column="0" BorderThickness="1" Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" CornerRadius="10" Padding="12 0"  >
                         <TextBlock x:Name="FolderPathTextBlock" Text="No selection" VerticalAlignment="Center" HorizontalAlignment="Left" />
                     </Border>
 
-                    <Border Grid.Row="5" Grid.Column="0" BorderThickness="1" CornerRadius="14" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                    <Border Grid.Row="5" Grid.Column="0" BorderThickness="1" CornerRadius="14" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
                             AllowDrop="True" Drop="DropFile" DragOver="OnDragOver">
-                        <TextBlock Text="Drag &amp; drop Picture file here" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Grid.Row="0" Text=""/>
+                            <TextBlock Text="Drag &amp; drop Picture file here" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Grid>
                     </Border>
 
                     <Button Grid.Row="6" Grid.Column="0" Content="Browse image..." Click="BrowseImage_Click"/>
 
-                    <Border Grid.Row="7" Grid.Column="0" BorderThickness="1" Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" CornerRadius="10" Padding="12 0" >
+                    <Border Grid.Row="7" Grid.Column="0" BorderThickness="1" Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" CornerRadius="10" Padding="12 0" >
                         <TextBlock x:Name="ImagePathTextBlock" Text="No selection" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                     </Border>
 
