@@ -1,6 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OBRmain", "OBRmain\OBRmain.csproj", "{78B70947-D531-4907-970D-BCDB9B926724}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OsuBackgroundReplacerMain", "OsuBackgroundReplacerMain\OsuBackgroundReplacerMain.csproj", "{1A19CACC-F5E5-4460-BD88-66D8541AD0D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +17,17 @@ Global
 		{78B70947-D531-4907-970D-BCDB9B926724}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78B70947-D531-4907-970D-BCDB9B926724}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78B70947-D531-4907-970D-BCDB9B926724}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A19CACC-F5E5-4460-BD88-66D8541AD0D1}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{1A19CACC-F5E5-4460-BD88-66D8541AD0D1}.Debug|Any CPU.Build.0 = Debug|x64
+		{1A19CACC-F5E5-4460-BD88-66D8541AD0D1}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{1A19CACC-F5E5-4460-BD88-66D8541AD0D1}.Release|Any CPU.ActiveCfg = Release|x64
+		{1A19CACC-F5E5-4460-BD88-66D8541AD0D1}.Release|Any CPU.Build.0 = Release|x64
+		{1A19CACC-F5E5-4460-BD88-66D8541AD0D1}.Release|Any CPU.Deploy.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5DB3DF6F-0750-444F-96A5-2FC75288ACBD}
 	EndGlobalSection
 EndGlobal

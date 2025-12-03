@@ -1,0 +1,89 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace OsuBackgroundReplacerMain.Logic
+{
+    internal class Operations
+    {
+        public static async Task<List<string>> Replacement(IProgress<int>? progress = null)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(ImageOperations.SelectedImagePath) ||
+                    string.IsNullOrEmpty(FolderOperations.SelectedFolderPath) ||
+                    !File.Exists(ImageOperations.SelectedImagePath) ||
+                    !Directory.Exists(FolderOperations.SelectedFolderPath))
+                {
+                    await MainWindow.ShowDialogAsync("File or folder does not exist.", "Error");
+                    return new List<string>();
+                }
+
+                List<string> replacedFiles = new List<string>();
+
+                // Get all files (run on background thread to keep UI responsive)
+                var allImageFiles = await Task.Run(() =>
+                    Directory.GetDirectories(FolderOperations.SelectedFolderPath)
+                    .SelectMany(folder => Directory.GetFiles(folder, "*.*")
+                        .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                    f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                    f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)))
+                    .ToList());
+
+                int total = allImageFiles.Count;
+                int current = 0;
+
+                // Process folders
+                var folders = Directory.GetDirectories(FolderOperations.SelectedFolderPath);
+
+                foreach (var folder in folders)
+                {
+                    var imageFiles = await Task.Run(() => Directory.GetFiles(folder, "*.*")
+                        .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                    f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                    f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                        .ToList());
+
+                    if (imageFiles.Count > 0)
+                    {
+                        foreach (var imageFile in imageFiles)
+                        {
+                            string newFileName = Path.GetFileName(imageFile);
+                            string newFilePath = Path.Combine(folder, newFileName);
+
+                            try
+                            {
+                                await Task.Run(() => File.Copy(ImageOperations.SelectedImagePath, newFilePath, true));
+                                replacedFiles.Add(newFilePath);
+                            }
+                            catch (Exception exception)
+                            {
+                                await MainWindow.ShowDialogAsync($"Issue: {exception.Message}", "Error");
+                                return new List<string>();
+                            }
+
+                            current++;
+                            int percent = (total > 0) ? (int)((double)current / total * 100) : 0;
+                            progress?.Report(percent);
+                        }
+                    }
+                }
+
+                // Use DispatcherQueue to update UI from background thread
+                MainWindow.Current.DispatcherQueue.TryEnqueue(async () =>
+                {
+                    await MainWindow.ShowDialogAsync($"Successfully changed {replacedFiles.Count} files.", "Done");
+                });
+
+                return replacedFiles;
+            }
+            catch (Exception exception)
+            {
+                await MainWindow.ShowDialogAsync(exception.Message, "Error in replacing");
+                return new List<string>();
+            }
+        }
+    }
+}

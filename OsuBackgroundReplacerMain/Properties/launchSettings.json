@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "OsuBackgroundReplacerMain (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "OsuBackgroundReplacerMain (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
