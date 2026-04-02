@@ -12,77 +12,50 @@ namespace OsuBackgroundReplacerMain.Logic
         {
             try
             {
-                if (string.IsNullOrEmpty(ImageOperations.SelectedImagePath) ||
-                    string.IsNullOrEmpty(FolderOperations.SelectedFolderPath) ||
-                    !File.Exists(ImageOperations.SelectedImagePath) ||
-                    !Directory.Exists(FolderOperations.SelectedFolderPath))
+                if (string.IsNullOrEmpty(ImageOperations.getPath()) ||
+                    string.IsNullOrEmpty(FolderOperations.getPath()) ||
+                    !File.Exists(ImageOperations.getPath()) ||
+                    !Directory.Exists(FolderOperations.getPath()))
                 {
-                    await MainWindow.ShowDialogAsync("File or folder does not exist.", "Error");
-                    return new List<string>();
+                    throw new InvalidOperationException("File or folder does not exist.");
                 }
 
                 List<string> replacedFiles = new List<string>();
 
-                // Get all files (run on background thread to keep UI responsive)
                 var allImageFiles = await Task.Run(() =>
-                    Directory.GetDirectories(FolderOperations.SelectedFolderPath)
-                    .SelectMany(folder => Directory.GetFiles(folder, "*.*")
-                        .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                                    f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
-                                    f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)))
-                    .ToList());
+                        Directory.GetDirectories(FolderOperations.getPath())
+                        .SelectMany(folder => Directory.GetFiles(folder, "*.*"))
+                        .Where(f => Constants.IsSupportedImage(f))
+                        .ToList()
+                    );
 
                 int total = allImageFiles.Count;
                 int current = 0;
 
-                // Process folders
-                var folders = Directory.GetDirectories(FolderOperations.SelectedFolderPath);
+                var folders = Directory.GetDirectories(FolderOperations.getPath());
 
-                foreach (var folder in folders)
+                foreach (var imageFile in allImageFiles)
                 {
-                    var imageFiles = await Task.Run(() => Directory.GetFiles(folder, "*.*")
-                        .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                                    f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
-                                    f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                        .ToList());
-
-                    if (imageFiles.Count > 0)
+                    try
                     {
-                        foreach (var imageFile in imageFiles)
-                        {
-                            string newFileName = Path.GetFileName(imageFile);
-                            string newFilePath = Path.Combine(folder, newFileName);
+                        await Task.Run(() => File.Copy(ImageOperations.getPath(), imageFile, true));
 
-                            try
-                            {
-                                await Task.Run(() => File.Copy(ImageOperations.SelectedImagePath, newFilePath, true));
-                                replacedFiles.Add(newFilePath);
-                            }
-                            catch (Exception exception)
-                            {
-                                await MainWindow.ShowDialogAsync($"Issue: {exception.Message}", "Error");
-                                return new List<string>();
-                            }
-
-                            current++;
-                            int percent = (total > 0) ? (int)((double)current / total * 100) : 0;
-                            progress?.Report(percent);
-                        }
+                        replacedFiles.Add(imageFile);
                     }
-                }
+                    catch (Exception exception)
+                    {
+                        throw new Exception($"Issue copying to {imageFile}: {exception.Message}", exception);
+                    }
 
-                // Use DispatcherQueue to update UI from background thread
-                MainWindow.Current.DispatcherQueue.TryEnqueue(async () =>
-                {
-                    await MainWindow.ShowDialogAsync($"Successfully changed {replacedFiles.Count} files.", "Done");
-                });
+                    current++;
+                    progress?.Report((int)((double)current / total * 100));
+                }
 
                 return replacedFiles;
             }
             catch (Exception exception)
             {
-                await MainWindow.ShowDialogAsync(exception.Message, "Error in replacing");
-                return new List<string>();
+                throw new InvalidOperationException(exception.Message);
             }
         }
     }
