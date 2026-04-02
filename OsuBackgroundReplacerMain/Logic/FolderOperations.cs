@@ -9,7 +9,12 @@ namespace OsuBackgroundReplacerMain.Logic
 {
     class FolderOperations
     {
-        public static string SelectedFolderPath { get; set; }
+        private static string _selectedPath;
+
+        public static string getPath()
+        {
+            return _selectedPath;
+        }
 
         public static async Task ChooseFolderManually(Window window)
         {
@@ -17,7 +22,6 @@ namespace OsuBackgroundReplacerMain.Logic
             {
                 var folderPicker = new FolderPicker();
 
-                // Retrieve the window handle (HWND)
                 var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
                 WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hWnd);
 
@@ -27,7 +31,7 @@ namespace OsuBackgroundReplacerMain.Logic
                 StorageFolder folder = await folderPicker.PickSingleFolderAsync();
                 if (folder != null)
                 {
-                    SelectedFolderPath = folder.Path;
+                    _selectedPath = folder.Path;
                 }
             }
             catch (Exception exception)
@@ -48,7 +52,7 @@ namespace OsuBackgroundReplacerMain.Logic
                         var folder = items[0] as StorageFolder;
                         if (folder != null)
                         {
-                            SelectedFolderPath = folder.Path;
+                            _selectedPath = folder.Path;
                         }
                         else
                         {

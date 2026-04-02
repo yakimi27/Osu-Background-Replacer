@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -9,16 +10,19 @@ namespace OsuBackgroundReplacerMain.Logic
 {
     internal class ImageOperations
     {
-        public static string SelectedImagePath { get; set; }
+        private static string _selectedImagePath;
+
+        public static string getPath()
+        {
+            return _selectedImagePath;
+        }
 
         public static async Task ChooseImageManually(Window window)
         {
             try
             {
-                // WinUI 3 File Picker setup
                 var openPicker = new FileOpenPicker();
 
-                // Retrieve the window handle (HWND) of the current WinUI 3 window.
                 var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
                 WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
 
@@ -31,7 +35,7 @@ namespace OsuBackgroundReplacerMain.Logic
                 StorageFile file = await openPicker.PickSingleFileAsync();
                 if (file != null)
                 {
-                    SelectedImagePath = file.Path;
+                    _selectedImagePath = file.Path;
                 }
             }
             catch (Exception exception)
@@ -53,9 +57,9 @@ namespace OsuBackgroundReplacerMain.Logic
                         if (file != null)
                         {
                             string type = file.FileType.ToLower();
-                            if (type == ".jpg" || type == ".jpeg" || type == ".png")
+                            if (Constants.SupportedImageExtensions.Contains(type))
                             {
-                                SelectedImagePath = file.Path;
+                                _selectedImagePath = file.Path;
                             }
                             else
                             {
