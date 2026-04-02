@@ -119,9 +119,9 @@
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Save last picture path" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Confirm before replace" VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
-                        <CheckBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <CheckBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <ToggleSwitch x:Name="CheckBoxSaveLastFolderPath" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <ToggleSwitch x:Name="CheckBoxSaveLastImagePath" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <ToggleSwitch x:Name="CheckBoxConfirm"  Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"/>
                     </Grid>
                 </Grid>
             </Border>

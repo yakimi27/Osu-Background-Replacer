@@ -16,13 +16,18 @@ namespace OsuBackgroundReplacerMain
 {
     public sealed partial class MainWindow : Window
     {
-        // Static reference so logic classes can access UI thread/Dialogs
+        public enum PathType
+        {
+            Folder,
+            Image
+        }
+
         public static MainWindow Current { get; private set; }
 
         public MainWindow()
         {
             InitializeComponent();
-            Current = this; // Assign current instance
+            Current = this;
             ExtendsContentIntoTitleBar = true;
 
             OverlappedPresenter presenter = OverlappedPresenter.Create();
@@ -33,25 +38,16 @@ namespace OsuBackgroundReplacerMain
 
         private async void BrowseFolder_Click(object sender, RoutedEventArgs e)
         {
-            // Pickers are async in WinUI
             await FolderOperations.ChooseFolderManually(this);
-
-            FolderPathTextBlock.Text = FolderOperations.SelectedFolderPath ?? "No selection";
-            ToolTipService.SetToolTip(FolderPathTextBlock, FolderOperations.SelectedFolderPath);
-            FolderPathTextBlock.Visibility = Visibility.Visible;
+            ChangePathDirectionVisibility(PathType.Folder);
         }
 
         private async void BrowseImage_Click(object sender, RoutedEventArgs e)
         {
-            // Pickers are async in WinUI
             await ImageOperations.ChooseImageManually(this);
-
-            ImagePathTextBlock.Text = ImageOperations.SelectedImagePath ?? "No selection";
-            ToolTipService.SetToolTip(ImagePathTextBlock, ImageOperations.SelectedImagePath);
-            ImagePathTextBlock.Visibility = Visibility.Visible;
+            ChangePathDirectionVisibility(PathType.Image);
         }
 
-        // Required for Drag and Drop to work in WinUI 3
         private void OnDragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = DataPackageOperation.Copy;
@@ -59,28 +55,40 @@ namespace OsuBackgroundReplacerMain
 
         private async void DropFolder(object sender, DragEventArgs e)
         {
-            // Drop is async
             await FolderOperations.DragAndDropFolder(e);
-
-            FolderPathTextBlock.Text = FolderOperations.SelectedFolderPath ?? "No selection";
-            ToolTipService.SetToolTip(FolderPathTextBlock, FolderOperations.SelectedFolderPath);
-            FolderPathTextBlock.Visibility = Visibility.Visible;
+            ChangePathDirectionVisibility(PathType.Folder);
         }
 
         private async void DropFile(object sender, DragEventArgs e)
         {
-            // Drop is async
             await ImageOperations.DragAndDropImage(e);
+            ChangePathDirectionVisibility(PathType.Image);
+        }
 
-            ImagePathTextBlock.Text = ImageOperations.SelectedImagePath ?? "No selection";
-            ToolTipService.SetToolTip(ImagePathTextBlock, ImageOperations.SelectedImagePath);
-            ImagePathTextBlock.Visibility = Visibility.Visible;
+        private void ChangePathDirectionVisibility(PathType type)
+        {
+            var (textBlock, path) = type switch
+            {
+                PathType.Folder => (FolderPathTextBlock, FolderOperations.getPath()),
+                PathType.Image => (ImagePathTextBlock, ImageOperations.getPath()),
+                _ => throw new ArgumentOutOfRangeException(nameof(type))
+            };
+
+            textBlock.Text = path ?? "No selection";
+            ToolTipService.SetToolTip(textBlock, path);
+            textBlock.Visibility = Visibility.Visible;
         }
 
         private async void Replace_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(FolderOperations.SelectedFolderPath) ||
-                !FolderOperations.SelectedFolderPath.Contains("osu!\\Songs", StringComparison.OrdinalIgnoreCase))
+
+            var confirmation = await ShowDialogAsync(
+                "You are going to replace all images in folders inside {} folder to {} image. Is all right?",
+                "Confirmation", "Yes", "No");
+            if (confirmation != ContentDialogResult.Primary) return;
+
+            if (string.IsNullOrEmpty(FolderOperations.getPath()) ||
+                !FolderOperations.getPath().Contains("osu!\\Songs", StringComparison.OrdinalIgnoreCase))
             {
                 var result = await ShowDialogAsync(
                     "The selected path doesn't contain the \"osu!\\Songs\" folder. Are you sure you want to continue?",
@@ -98,10 +106,8 @@ namespace OsuBackgroundReplacerMain
             ActivityLog.ItemsSource = replacedFiles;
         }
 
-        // Replacement for MessageBox.Show
         public static async Task<ContentDialogResult> ShowDialogAsync(string content, string title, string primaryBtnText = "OK", string closeBtnText = null)
         {
-            // ContentDialog must be created on the UI Thread
             if (Current.DispatcherQueue.HasThreadAccess)
             {
                 return await ShowDialogInternal(content, title, primaryBtnText, closeBtnText);
@@ -118,16 +124,16 @@ namespace OsuBackgroundReplacerMain
             }
         }
 
-        private static async Task<ContentDialogResult> ShowDialogInternal(string content, string title, string primaryBtnText, string closeBtnText)
+        private static async Task<ContentDialogResult> ShowDialogInternal(string content, string title, string primaryButtonText, string closeButtonText)
         {
             ContentDialog dialog = new ContentDialog
             {
-                XamlRoot = Current.Content.XamlRoot, // Critical for WinUI 3
+                XamlRoot = Current.Content.XamlRoot,
                 Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
                 Title = title,
                 Content = content,
-                PrimaryButtonText = primaryBtnText,
-                CloseButtonText = closeBtnText
+                PrimaryButtonText = primaryButtonText,
+                CloseButtonText = closeButtonText
             };
             return await dialog.ShowAsync();
         }
@@ -142,7 +148,6 @@ namespace OsuBackgroundReplacerMain
             var pointerPoint = e.GetCurrentPoint(listBox);
             int wheelDelta = pointerPoint.Properties.MouseWheelDelta;
 
-            // WinUI Key State check
             var ctrlState = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
             bool isCtrlDown = (ctrlState & CoreVirtualKeyStates.Down) == CoreVirtualKeyStates.Down;
 
@@ -151,11 +156,8 @@ namespace OsuBackgroundReplacerMain
                 scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - wheelDelta);
                 e.Handled = true;
             }
-            // Vertical scrolling is usually handled natively by ListBox, 
-            // but if you want to override speed:
             else
             {
-                // Native handling usually preferred, uncomment if you need custom speed
                 // scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - wheelDelta);
                 // e.Handled = true;
             }
